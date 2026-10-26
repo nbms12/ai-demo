@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gradient To-Do App</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    }
+
+    .todo-container {
+      width: 100%;
+      max-width: 450px;
+      padding: 30px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 50px rgba(35, 20, 80, 0.25);
+    }
+
+    h1 {
+      color: white;
+      font-size: 30px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #f3eaff;
+      margin-bottom: 25px;
+      font-size: 14px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #taskInput {
+      flex: 1;
+      min-width: 0;
+      padding: 13px 15px;
+      border: none;
+      outline: none;
+      border-radius: 12px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    #addBtn {
+      padding: 12px 17px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    #addBtn:hover {
+      transform: scale(1.06);
+    }
+
+    .task-info {
+      display: flex;
+      justify-content: space-between;
+      color: white;
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+
+    #taskList {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 12px;
+      color: #333;
+      animation: appear 0.25s ease;
+    }
+
+    .task span {
+      flex: 1;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+    }
+
+    .task input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #764ba2;
+      cursor: pointer;
+    }
+
+    .task.completed span {
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    .delete-btn {
+      border: none;
+      background: #ffe5eb;
+      color: #e84362;
+      padding: 7px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .delete-btn:hover {
+      background: #ffcbd6;
+    }
+
+    .empty-message {
+      color: white;
+      text-align: center;
+      padding: 25px 10px;
+      font-size: 14px;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 400px) {
+      .todo-container {
+        padding: 22px 16px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="todo-container">
+    <h1>✨ My To-Do List</h1>
+    <p class="subtitle">Small steps, big achievements!</p>
+
+    <form class="input-group" id="taskForm">
+      <input
+        type="text"
+        id="taskInput"
+        placeholder="What do you need to do?"
+        aria-label="New task"
+        maxlength="200"
+        required
+      >
+      <button type="submit" id="addBtn" aria-label="Add task">+</button>
+    </form>
+
+    <div class="task-info">
+      <span id="totalTasks">Total: 0</span>
+      <span id="completedTasks">Completed: 0</span>
+    </div>
+
+    <ul id="taskList">
+      <li class="empty-message">No tasks yet. Add one above! 🌈</li>
+    </ul>
+  </main>
+
+  <script>
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+    const totalTasks = document.getElementById("totalTasks");
+    const completedTasks = document.getElementById("completedTasks");
+
+    let tasks = [];
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+
+      if (tasks.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "empty-message";
+        empty.textContent = "No tasks yet. Add one above! 🌈";
+        taskList.appendChild(empty);
+      }
+
+      tasks.forEach((task) => {
+        const li = document.createElement("li");
+        li.className = "task" + (task.completed ? " completed" : "");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+        checkbox.setAttribute("aria-label", "Mark task complete");
+
+        checkbox.addEventListener("change", () => {
+          task.completed = checkbox.checked;
+          renderTasks();
+        });
+
+        const span = document.createElement("span");
+        span.textContent = task.text;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "Delete";
+        deleteBtn.setAttribute("aria-label", "Delete " + task.text);
+
+        deleteBtn.addEventListener("click", () => {
+          tasks = tasks.filter((item) => item.id !== task.id);
+          renderTasks();
+        });
+
+        li.append(checkbox, span, deleteBtn);
+        taskList.appendChild(li);
+      });
+
+      totalTasks.textContent = "Total: " + tasks.length;
+      completedTasks.textContent =
+        "Completed: " + tasks.filter((task) => task.completed).length;
+    }
+
+    taskForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      tasks.push({
+        id: Date.now() + Math.random(),
+        text: text,
+        completed: false
+      });
+
+      taskInput.value = "";
+      renderTasks();
+      taskInput.focus();
+    });
+
+    renderTasks();
+  </script>
+
+</body>
+</html>
+
